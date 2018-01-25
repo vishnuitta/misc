@@ -1,0 +1,24 @@
+pools:
+ - type: src
+   create: yes
+   name: spool
+   cachefile: /tmp/cstor/spool.cache
+   pooltype:
+   diskpaths: /tmp/cstor/sdisk.img
+
+datasets:
+ - type: src
+   id: 0 
+   create: no
+   open: no
+   externalIP:
+   name: svol
+   parent: spool
+   volblocksize: 4096
+   size: 10737418240
+   readonly: off
+   sync: always
+   copies: 1
+   logbias: latency
+   compression: on
+

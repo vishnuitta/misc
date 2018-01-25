@@ -1,0 +1,49 @@
+
+cmotion_usage()
+{
+	echo "Usage: mayac cmotion src <src_cluster> dst <dest_cluster>"
+}
+
+if [ "$1" == "describe" ]; then
+  if [ "$2" == "cluster1" ]; then
+    echo "Cluster1: 35.188.69.178"
+  elif [ "$2" == "cluster2" ]; then
+    echo "Cluster2: 35.192.84.168"
+  else
+    echo "unknown cluster"
+  fi
+  exit
+fi
+
+if [ "$1" == "cmotion" ]; then
+  if [ "$2" == "src" ]; then
+    src=$3
+  else
+    echo "Please specify source"
+    cmotion_usage
+    exit
+  fi
+  if [ "$4" == "dst" ]; then
+    dst=$5
+  else
+    echo "Please specify destination"
+    cmotion_usage
+    exit
+  fi
+  migrate.sh $src $dst
+  exit
+fi
+
+if [ "$1" == "status" ]; then
+  status.sh
+  exit
+fi
+	
+if [ "$1" == "prepare" ]; then
+  cmotion_prepare.sh
+  echo "Preparation done"
+  exit
+fi
+
+echo "unknown command"
+exit

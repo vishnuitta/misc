@@ -1,0 +1,78 @@
+#sample one
+#some more
+
+#permissions to access gcloud etc:
+#create a service account named 'developer', and get the private key
+#give 'project->service account actor'/'project->owner',
+#'kubernetesEngine->kubernetesEngineDeveloper','compute engine->compute admin'
+#
+#Created machines, and one additional disk each
+#format the disk as ext4, mount as /tmp/cstor
+
+#Below are for minions
+sudo apt-get install git
+git clone https://github.com/vishnuitta/misc
+
+cp ~/misc/cstor_mi.yaml /tmp/cstor 
+cp ~/misc/istgt.conf /tmp/cstor
+cp ~/misc/istgtcontrol.conf /tmp/cstor
+
+#To create for first time:
+#make create in pool/dataset as yes, and open as no
+#make OperationalMode as 0 in istgt.conf
+#After creation, set create in pool as yes, [How to create or to bring up is done in master]
+#create/open in dataset as no, and
+#and OperationMode as 1 in istgt.conf
+#
+#To create from existing disk:
+#copy zpool.cache and sdisk.img to /tmp/cstor
+#make create in pool/dataset as no, and open as yes
+#make OperationalMode as 0 in istgt.conf
+#After bringing up, set create in pool as yes,
+#create/open in dataset as no, and,
+#OperationalMode as 1 in istgt.conf
+
+#Below are for master
+sudo apt-get install git
+git clone https://github.com/vishnuitta/misc
+
+cd ~/misc
+kubectl config get-contexts
+kubectl config current-context
+kubectl config set-context test-admin --cluster=<clustername>gke_maya-techpreview_europe-west2-a_denmark-cicd --user=cluster-admin
+kubectl config use-context test-admin
+
+kubectl create -f openebs-storageclasses.yaml
+kubectl create -f openebs-operator.yaml
+
+kubectl config use-context <oldone>
+
+sudo ln -s ~/misc/mayac /bin/
+sudo ln -s ~/misc/cmotion_prepare.sh /bin/
+sudo ln -s ~/misc/migrate.sh /bin/
+sudo ln -s ~/misc/status.sh /bin/
+sudo ln -s ~/misc/mayactl /bin/
+
+#With this, jenkins will be running or in containercreating.
+#If this is first time or bringing from backup,
+#it will be in running, along with storage
+cp ~/misc/jenkins.yml .
+mayac prepare
+mayac status
+
+mayac cmotion src <src> dst <dst> pod jenkins
+
+astin client: gcloud compute --project "maya-techpreview" ssh --zone "us-central1-a" "austinmaya"
+austin minion: gcloud compute --project "maya-techpreview" ssh --zone "us-central1-a" "gke-austin-cicd-default-pool-e524ec70-ndsd"
+
+denmark client: gcloud compute --project "maya-techpreview" ssh --zone "europe-west2-a" "denmarkmaya"
+denmark minion: gcloud compute --project "maya-techpreview" ssh --zone "europe-west2-a" "gke-denmark-cicd-default-pool-fcf6b4c9-70j6"
+
+AWS:
+cd ~/aws_vagrant
+vagrant ssh mule-01
+aws mulemaster: 52.204.187.32
+aws mulenode: 34.229.6.164
+
+jenkins pwd: admintest
+
